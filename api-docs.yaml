@@ -1,0 +1,546 @@
+openapi: 3.1.0
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+- url: http://localhost:8080
+  description: Generated server url
+paths:
+  /api/leaverequest/{requestId}/reject:
+    put:
+      tags:
+      - leave-request-controller
+      operationId: rejectRequest
+      parameters:
+      - name: managerId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: requestId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: comment
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /api/leaverequest/{requestId}/approve:
+    put:
+      tags:
+      - leave-request-controller
+      operationId: approveRequest
+      parameters:
+      - name: managerId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: requestId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: comment
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /api/leaverequest/{id}:
+    get:
+      tags:
+      - leave-request-controller
+      operationId: viewLeaveRequest
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+    put:
+      tags:
+      - leave-request-controller
+      operationId: update
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LeaveRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /api/leaverequest/cancel:
+    put:
+      tags:
+      - leave-request-controller
+      operationId: cancelRequest
+      parameters:
+      - name: employeeId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: requestId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /api/leavetype:
+    get:
+      tags:
+      - leave-type-controller
+      operationId: viewAll
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+    post:
+      tags:
+      - leave-type-controller
+      operationId: create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LeaveType"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /api/leaverequest:
+    get:
+      tags:
+      - leave-request-controller
+      operationId: viewAll_1
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+    post:
+      tags:
+      - leave-request-controller
+      operationId: create_1
+      parameters:
+      - name: employeeId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: leaveTypeId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LeaveRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /api/employee/{id}:
+    get:
+      tags:
+      - employee-controller
+      operationId: viewEmployee
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+    post:
+      tags:
+      - employee-controller
+      operationId: create_2
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Employee"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /api/department:
+    get:
+      tags:
+      - department-controller
+      operationId: findAll
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+    post:
+      tags:
+      - department-controller
+      operationId: save
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Department"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /api/contract/{id}:
+    post:
+      tags:
+      - contract-controller
+      operationId: save_1
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Contract"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /api/leavetype/{id}:
+    get:
+      tags:
+      - leave-type-controller
+      operationId: viewLeaveType
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /api/leaverequest/employee/{employeeId}:
+    get:
+      tags:
+      - leave-request-controller
+      operationId: getRequests
+      parameters:
+      - name: employeeId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Pageable"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /api/leaverequest/employee/{employeeId}/status:
+    get:
+      tags:
+      - leave-request-controller
+      operationId: getMyRequestsByStatus
+      parameters:
+      - name: employeeId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: status
+        in: query
+        required: true
+        schema:
+          type: string
+          enum:
+          - PENDING
+          - APPROVED
+          - REJECTED
+          - CANCELLED
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Pageable"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /api/employee:
+    get:
+      tags:
+      - employee-controller
+      operationId: getAll
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EmployeeResponseDTO"
+  /api/contract:
+    get:
+      tags:
+      - contract-controller
+      operationId: getAll_1
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+components:
+  schemas:
+    Department:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+        employees:
+          type: array
+          items:
+            $ref: "#/components/schemas/Employee"
+    Employee:
+      type: object
+      properties:
+        matricule:
+          type: integer
+          format: int64
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        jobTitle:
+          type: string
+        hireDate:
+          type: string
+          format: date
+        role:
+          type: string
+          enum:
+          - RH_MANAGER
+          - MANAGER
+        department:
+          $ref: "#/components/schemas/Department"
+    LeaveRequest:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        reason:
+          type: string
+        status:
+          type: string
+          enum:
+          - PENDING
+          - APPROVED
+          - REJECTED
+          - CANCELLED
+        employee:
+          $ref: "#/components/schemas/Employee"
+        leavetype:
+          $ref: "#/components/schemas/LeaveType"
+    LeaveType:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+        annualallowancedays:
+          type: integer
+          format: int64
+        leaverequest:
+          type: array
+          items:
+            $ref: "#/components/schemas/LeaveRequest"
+    Contract:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        contractType:
+          type: string
+          enum:
+          - CDI
+          - CDD
+          - STAGE
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        salary:
+          type: integer
+          format: int64
+        employee:
+          type: array
+          items:
+            $ref: "#/components/schemas/Employee"
+    Pageable:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+          minimum: 0
+        size:
+          type: integer
+          format: int32
+          minimum: 1
+        sort:
+          type: array
+          items:
+            type: string
+    EmployeeResponseDTO:
+      type: object
+      properties:
+        matricule:
+          type: integer
+          format: int64
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        jobTitle:
+          type: string
+        hireDate:
+          type: string
+          format: date
+        role:
+          type: string

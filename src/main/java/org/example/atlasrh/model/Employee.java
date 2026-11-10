@@ -122,5 +122,11 @@ public class Employee {
         this.department = department;
     }
 
+    public Contract getContract() {
+        return contract;
+    }
 
+    public void setContract(Contract contract) {
+        this.contract = contract;
+    }
 }

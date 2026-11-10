@@ -92,6 +92,7 @@ public class LeaveRequestController {
         }
     }
 
+    //PostMan done
     @GetMapping("/employee/{employeeId}/balance")
     @Operation(summary = "View remaining leave balance for each leave type")
     public ResponseEntity<?> getLeaveBalances(@PathVariable Long employeeId) {
@@ -102,6 +103,7 @@ public class LeaveRequestController {
         }
     }
 
+    //PostMan done
     @GetMapping("/employee/{employeeId}/length-of-service")
     @Operation(summary = "View employee length of service in years and months")
     public ResponseEntity<?> getLengthOfService(@PathVariable Long employeeId) {

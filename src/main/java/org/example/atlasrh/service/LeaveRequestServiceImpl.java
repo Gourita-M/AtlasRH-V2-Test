@@ -2,6 +2,8 @@ package org.example.atlasrh.service;
 
 import org.example.atlasrh.Enum.LeaveStatus;
 import org.example.atlasrh.Enum.RoleType;
+import org.example.atlasrh.dto.LeaveBalanceResponseDTO;
+import org.example.atlasrh.dto.LengthOfServiceResponseDTO;
 import org.example.atlasrh.dto.LeaveRequestResponseDTO;
 import org.example.atlasrh.mapper.LeaveRequestMapper;
 import org.example.atlasrh.model.Employee;
@@ -15,6 +17,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.Year;
 
 @Service
 public class LeaveRequestServiceImpl implements LeaveRequestService{
@@ -85,6 +91,72 @@ public class LeaveRequestServiceImpl implements LeaveRequestService{
     }
 
     @Override
+    public List<LeaveBalanceResponseDTO> getLeaveBalances(Long employeeId) {
+        requireEmployee(employeeId);
+        Year currentYear = Year.now();
+        LocalDate yearStart = currentYear.atDay(1);
+        LocalDate yearEnd = currentYear.atDay(currentYear.length());
+        List<LeaveRequest> approvedRequests = leaveRequestRepository
+                .findAllByEmployee_MatriculeAndStatus(employeeId, LeaveStatus.APPROVED);
+
+        return leaveTypeRepository.findAll().stream()
+                .map(leaveType -> {
+                    long approvedDaysUsed = approvedRequests.stream()
+                            .filter(request -> request.getLeavetype() != null
+                                    && request.getLeavetype().getId().equals(leaveType.getId()))
+                            .mapToLong(request -> countWorkingDaysInPeriod(
+                                    request.getStartDate(), request.getEndDate(), yearStart, yearEnd))
+                            .sum();
+                    return new LeaveBalanceResponseDTO(
+                            leaveType.getId(),
+                            leaveType.getName(),
+                            leaveType.getAnnualallowancedays(),
+                            approvedDaysUsed,
+                            leaveType.getAnnualallowancedays() - approvedDaysUsed
+                    );
+                })
+                .toList();
+    }
+
+    @Override
+    public LengthOfServiceResponseDTO getLengthOfService(Long employeeId) {
+        Employee employee = requireEmployee(employeeId);
+        LocalDate today = LocalDate.now();
+        if (employee.getHireDate() == null || employee.getHireDate().isAfter(today)) {
+            throw new IllegalStateException("Employee has an invalid hire date: " + employeeId);
+        }
+
+        Period servicePeriod = Period.between(employee.getHireDate(), today);
+        return new LengthOfServiceResponseDTO(servicePeriod.getYears(), servicePeriod.getMonths());
+    }
+
+    private Employee requireEmployee(Long employeeId) {
+        if (employeeId == null) {
+            throw new IllegalArgumentException("Employee ID is required");
+        }
+        return employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new IllegalArgumentException("Employee not found: " + employeeId));
+    }
+
+    private long countWorkingDaysInPeriod(LocalDate startDate, LocalDate endDate,
+                                          LocalDate periodStart, LocalDate periodEnd) {
+        LocalDate start = startDate.isAfter(periodStart) ? startDate : periodStart;
+        LocalDate end = endDate.isBefore(periodEnd) ? endDate : periodEnd;
+        if (start.isAfter(end)) {
+            return 0;
+        }
+
+        long workingDays = 0;
+        for (LocalDate day = start; !day.isAfter(end); day = day.plusDays(1)) {
+            DayOfWeek dayOfWeek = day.getDayOfWeek();
+            if (dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY) {
+                workingDays++;
+            }
+        }
+        return workingDays;
+    }
+
+    @Override
     public boolean cancelRequest(Long employeeId, Long requestId) {
         LeaveRequest leaveRequest = leaveRequestRepository.findByIdAndEmployee_Matricule(requestId, employeeId);
         if(leaveRequest != null){
@@ -98,7 +170,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService{
 
     @Override
     public boolean approveRequest(Long managerId, Long requestId, String comment){
-        if (!isManager(managerId)) {
+        if (requestId == null || !isManager(managerId)) {
             return false;
         }
 
@@ -116,7 +188,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService{
     @Override
     public boolean rejectRequest(Long managerId, Long requestId, String comment){
         String decisionComment = normalizeComment(comment);
-        if (!isManager(managerId) || decisionComment == null) {
+        if (requestId == null || !isManager(managerId) || decisionComment == null) {
             return false;
         }
 

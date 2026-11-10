@@ -27,6 +27,8 @@ public class LeaveRequest {
     private String reason;
     @Column(nullable = false)
     private LeaveStatus status;
+    @Column(name = "decision_comment")
+    private String decisionComment;
 
     @ManyToOne
     @JoinColumn(name = "employee_id")

@@ -65,6 +65,40 @@ Run only the employee service test:
 ./mvnw test -Dtest=EmployeeServiceTest
 ```
 
+## US6: Leave balance and length of service
+
+The employee leave-request API includes these read-only endpoints:
+
+```http
+GET /api/leaverequest/employee/{employeeId}/balance
+GET /api/leaverequest/employee/{employeeId}/length-of-service
+```
+
+The balance response includes each configured leave type, its annual allowance, approved working days used in the current calendar year, and the remaining balance. The service-length response reports completed years and remaining months since the employee's hire date.
+
+Example balance response:
+
+```json
+[
+  {
+    "leaveTypeId": 1,
+    "leaveTypeName": "Annual",
+    "annualAllowanceDays": 25,
+    "approvedDaysUsed": 3,
+    "remainingDays": 22
+  }
+]
+```
+
+Example length-of-service response:
+
+```json
+{
+  "years": 4,
+  "months": 7
+}
+```
+
 ## Example test coverage
 
 The current test verifies that:

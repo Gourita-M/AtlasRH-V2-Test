@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface EmployeeService {
 
-    Employee create(Employee dto, Long departmentId);
+    Employee create(Employee dto, Long departmentId, Long contractId);
 
     EmployeeResponseDTO update(Long id, Employee employee);
 

@@ -30,11 +30,13 @@ public class EmployeeController {
     }
 
     //PostMan done
-    @PostMapping("/{id}")
+    @PostMapping
     @Operation(summary = "Create Employee")
-    public ResponseEntity<?> create(@RequestBody Employee employee, @PathVariable("id") Long id){
+    public ResponseEntity<?> create(@RequestBody Employee employee, 
+                                    @RequestParam Long departmentId,
+                                    @RequestParam Long contractId){
         try {
-            Employee created = employeeService.create(employee, id);
+            Employee created = employeeService.create(employee, departmentId, contractId);
 
             return ResponseEntity
                     .status(HttpStatus.CREATED)

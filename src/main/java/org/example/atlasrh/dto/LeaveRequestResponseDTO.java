@@ -6,6 +6,7 @@ public record LeaveRequestResponseDTO(
         Long id,
         LocalDate startDate,
         LocalDate endDate,
-        String reason
+        String reason,
+        String decisionComment
 ) {
 }

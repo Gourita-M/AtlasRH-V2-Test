@@ -45,8 +45,8 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public List<DepartmentResponseDTO> viewAllByManager(Long managerId){
-//        List<DepartmentResponseDTO> departments = departmentRepository.findAll().stream()
-//                .filter(d -> d.getEmployees())
+    //        List<DepartmentResponseDTO> departments = departmentRepository.findAll().stream()
+    //                .filter(d -> d.getEmployees())
         return null;
     }
 

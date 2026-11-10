@@ -51,10 +51,10 @@ public class ContractServiceImpl implements ContractService{
     }
 
     @Override
-    public ContractResponseDTO viewContract(Long id){
+    public Contract viewContract(Long id){
         Contract found = contractRepository.findById(id).orElse(null);
         if(found != null){
-            return contractMapper.toResponseDTO(found);
+            return found;
         }else{
             return null;
         }

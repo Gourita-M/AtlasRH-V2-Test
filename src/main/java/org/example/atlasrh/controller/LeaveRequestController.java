@@ -92,6 +92,28 @@ public class LeaveRequestController {
         }
     }
 
+    @GetMapping("/employee/{employeeId}/balance")
+    @Operation(summary = "View remaining leave balance for each leave type")
+    public ResponseEntity<?> getLeaveBalances(@PathVariable Long employeeId) {
+        try {
+            return ResponseEntity.ok(leaveRequestService.getLeaveBalances(employeeId));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/employee/{employeeId}/length-of-service")
+    @Operation(summary = "View employee length of service in years and months")
+    public ResponseEntity<?> getLengthOfService(@PathVariable Long employeeId) {
+        try {
+            return ResponseEntity.ok(leaveRequestService.getLengthOfService(employeeId));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
     //PostMan done
     @PutMapping("/cancel")
     @Operation(summary = "Cancel LeaveRequest By ID")
@@ -141,5 +163,4 @@ public class LeaveRequestController {
         }
     }
 }
-
 

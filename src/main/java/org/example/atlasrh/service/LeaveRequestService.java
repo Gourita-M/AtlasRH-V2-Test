@@ -1,6 +1,8 @@
 package org.example.atlasrh.service;
 
 import org.example.atlasrh.Enum.LeaveStatus;
+import org.example.atlasrh.dto.LeaveBalanceResponseDTO;
+import org.example.atlasrh.dto.LengthOfServiceResponseDTO;
 import org.example.atlasrh.dto.LeaveRequestResponseDTO;
 import org.example.atlasrh.model.LeaveRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +21,10 @@ public interface LeaveRequestService {
     List<LeaveRequestResponseDTO> getRequests(Long employeeId, Pageable pageable);
 
     List<LeaveRequestResponseDTO> getMyRequestsByStatus(Long employeeId, LeaveStatus status, Pageable pageable);
+
+    List<LeaveBalanceResponseDTO> getLeaveBalances(Long employeeId);
+
+    LengthOfServiceResponseDTO getLengthOfService(Long employeeId);
 
     boolean cancelRequest(Long employeeId, Long requestId);
 

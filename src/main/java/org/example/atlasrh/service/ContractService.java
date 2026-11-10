@@ -11,7 +11,7 @@ public interface ContractService {
 
     ContractResponseDTO update(Long id, Contract contract);
 
-    ContractResponseDTO viewContract(Long id);
+    Contract viewContract(Long id);
 
     List<ContractResponseDTO> viewAll();
 

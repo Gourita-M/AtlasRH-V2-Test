@@ -1,6 +1,7 @@
 package org.example.atlasrh.service;
 
 import org.example.atlasrh.Enum.LeaveStatus;
+import org.example.atlasrh.Enum.RoleType;
 import org.example.atlasrh.dto.LeaveRequestResponseDTO;
 import org.example.atlasrh.mapper.LeaveRequestMapper;
 import org.example.atlasrh.model.Employee;
@@ -97,12 +98,51 @@ public class LeaveRequestServiceImpl implements LeaveRequestService{
 
     @Override
     public boolean approveRequest(Long managerId, Long requestId, String comment){
-        return false;
+        if (!isManager(managerId)) {
+            return false;
+        }
+
+        LeaveRequest leaveRequest = leaveRequestRepository.findById(requestId).orElse(null);
+        if (leaveRequest == null || leaveRequest.getStatus() != LeaveStatus.PENDING) {
+            return false;
+        }
+
+        leaveRequest.setStatus(LeaveStatus.APPROVED);
+        leaveRequest.setDecisionComment(normalizeComment(comment));
+        leaveRequestRepository.save(leaveRequest);
+        return true;
     }
 
     @Override
     public boolean rejectRequest(Long managerId, Long requestId, String comment){
-        return false;
+        String decisionComment = normalizeComment(comment);
+        if (!isManager(managerId) || decisionComment == null) {
+            return false;
+        }
+
+        LeaveRequest leaveRequest = leaveRequestRepository.findById(requestId).orElse(null);
+        if (leaveRequest == null || leaveRequest.getStatus() != LeaveStatus.PENDING) {
+            return false;
+        }
+
+        leaveRequest.setStatus(LeaveStatus.REJECTED);
+        leaveRequest.setDecisionComment(decisionComment);
+        leaveRequestRepository.save(leaveRequest);
+        return true;
+    }
+
+    private boolean isManager(Long managerId) {
+        return managerId != null
+                && employeeRepository.findById(managerId)
+                .map(manager -> manager.getRole() == RoleType.MANAGER)
+                .orElse(false);
+    }
+
+    private String normalizeComment(String comment) {
+        if (comment == null || comment.isBlank()) {
+            return null;
+        }
+        return comment.trim();
     }
 
 }

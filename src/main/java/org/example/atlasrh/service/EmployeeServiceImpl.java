@@ -88,4 +88,11 @@ public class EmployeeServiceImpl implements EmployeeService {
         return null;
      }
 
+     @Override
+     public List<EmployeeResponseDTO> getEmplyeeByMart(Long matr){
+        return employeeRepository.findAll().stream()
+                .filter(e -> matr.equals(e.getMatricule()))
+                .map(employeeMapper::toResponseDTO)
+                .toList();
+     }
 }

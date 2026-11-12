@@ -32,7 +32,7 @@ public class EmployeeController {
     //PostMan done
     @PostMapping
     @Operation(summary = "Create Employee")
-    public ResponseEntity<?> create(@RequestBody Employee employee, 
+    public ResponseEntity<?> create(@RequestBody Employee employee,
                                     @RequestParam Long departmentId,
                                     @RequestParam Long contractId){
         try {

@@ -39,4 +39,17 @@ public class DepartmentController {
         }
     }
 
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete an empty department")
+    public ResponseEntity<?> delete(@PathVariable Long id) {
+        try {
+            departmentService.deleteDepartment(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
 }

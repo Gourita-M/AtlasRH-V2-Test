@@ -7,6 +7,7 @@ import org.example.atlasrh.model.Employee;
 import org.example.atlasrh.service.EmployeeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,7 +33,7 @@ public class EmployeeController {
     //PostMan done
     @PostMapping
     @Operation(summary = "Create Employee")
-    public ResponseEntity<?> create(@RequestBody Employee employee,
+    public ResponseEntity<?> create(@Valid @RequestBody Employee employee,
                                     @RequestParam Long departmentId,
                                     @RequestParam Long contractId){
         try {
@@ -56,7 +57,7 @@ public class EmployeeController {
         try{
             return ResponseEntity.ok(employeeService.viewEmployee(id));
         }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 }

@@ -14,7 +14,7 @@ public interface LeaveRequestService {
 
     LeaveRequestResponseDTO update(Long id, LeaveRequest leaveRequest);
 
-    LeaveRequestResponseDTO viewLeaveRequest(Long id);
+    LeaveRequest viewLeaveRequest(Long id);
 
     List<LeaveRequestResponseDTO> viewAll();
 

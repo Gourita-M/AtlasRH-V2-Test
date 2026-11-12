@@ -1,115 +1,70 @@
-# AtlasRH V2 Test
+# AtlasRH V2
 
-This repository is a test-focused project built on top of the existing AtlasRH HR application. Its purpose is to validate backend business logic with unit tests, especially service-layer behavior such as employee creation and department validation.
+AtlasRH is a Spring Boot REST API for HR data, including departments, employees, contracts, leave types, and leave requests.
 
-## Project purpose
+## Stack
 
-This project is not meant to replace the main application. Instead, it acts as a testing companion for the AtlasRH backend and demonstrates how to:
+- Java 17 and Spring Boot 4.1.1
+- Maven, JUnit 5, Mockito, Spring MVC Test, and Spring Data JPA Test
+- H2 for isolated tests; PostgreSQL for application profiles
+- JaCoCo and SonarQube Scanner for Maven
 
-- test Spring service logic in isolation
-- mock repository and service dependencies with Mockito
-- validate business rules without needing a running database
-- keep the main project cleaner while still covering core behaviors
+## Test strategy
 
-## Tech stack
+- Service unit tests mock repositories and collaborators.
+- Controller tests use `@WebMvcTest` and `MockMvc`.
+- Repository tests use `@DataJpaTest` to verify filtering, pagination, and sorting.
+- End-to-end tests use `@SpringBootTest` and MockMvc across the web, service, repository, and database layers.
 
-- Java 17
-- Spring Boot 4.1.1
-- Maven
-- JUnit 5
-- Mockito
+Tests use the `test` profile and its dedicated in-memory H2 database (`jdbc:h2:mem:atlasrh-test`). The test profile creates and drops its schema; tests never connect to a development or deployment database.
 
-## Project structure
-
-```text
-AtlasRH-V2-Test/
-├── src/
-│   ├── main/
-│   │   └── java/
-│   │       └── org/example/atlasrh/
-│   │           ├── controller/
-│   │           ├── dto/
-│   │           ├── mapper/
-│   │           ├── model/
-│   │           ├── repository/
-│   │           └── service/
-│   └── test/
-│       └── java/
-│           └── org/example/atlasrh/
-│               └── EmployeeServiceTest.java
-├── pom.xml
-├── mvnw
-├── mvnw.cmd
-├── README.md
-└── target/
-```
-
-## Prerequisites
-
-Before running the tests, make sure you have:
-
-- Java 17 or newer
-- Maven 3.9+
-
-## Running the tests
-
-Run all test classes:
+Run tests:
 
 ```bash
 ./mvnw test
 ```
 
-Run only the employee service test:
+Run the employee service tests only:
 
 ```bash
 ./mvnw test -Dtest=EmployeeServiceTest
 ```
 
-## US6: Leave balance and length of service
+Generate coverage:
 
-The employee leave-request API includes these read-only endpoints:
+```bash
+./mvnw clean verify
+```
+
+JaCoCo reports are generated at `target/site/jacoco/index.html` (HTML) and `target/site/jacoco/jacoco.xml` (XML).
+
+## SonarQube
+
+Start a local SonarQube server, configure the `AtlasRH` project, and provide its token through `SONAR_TOKEN`:
+
+```bash
+./mvnw clean verify sonar:sonar \
+  -Dsonar.host.url=http://localhost:9000 \
+  -Dsonar.projectKey=AtlasRH \
+  -Dsonar.token=$SONAR_TOKEN \
+  -Dsonar.qualitygate.wait=true
+```
+
+This command waits for the configured Quality Gate and fails if it does not pass. Sonar findings and Quality Gate status must be recorded from a completed analysis against the target SonarQube instance, not inferred from local test results.
+
+## Covered business rules
+
+The tests exercise employee number/email uniqueness, self-manager rejection, active-contract constraints, leave working-day and balance calculations, leave approval/rejection/cancellation, HTTP validation and response statuses, employee filtering and pagination/sorting, and two full-stack scenarios.
+
+Fixes made alongside the tests include enforcing employee uniqueness and manager rules, selecting active contracts correctly, validating leave request references, implementing employee/leave-request search paths, preventing cancellation of decided requests, and correcting DTO mapping by binding Lombok and MapStruct annotation processing.
+
+Refresh actual coverage results using `./mvnw clean verify`. SonarQube results depend on the configured server profile and Quality Gate and should be added after the analysis has run.
+
+## Leave balance and length-of-service API
 
 ```http
 GET /api/leaverequest/employee/{employeeId}/balance
 GET /api/leaverequest/employee/{employeeId}/length-of-service
 ```
 
-The balance response includes each configured leave type, its annual allowance, approved working days used in the current calendar year, and the remaining balance. The service-length response reports completed years and remaining months since the employee's hire date.
-
-Example balance response:
-
-```json
-[
-  {
-    "leaveTypeId": 1,
-    "leaveTypeName": "Annual",
-    "annualAllowanceDays": 25,
-    "approvedDaysUsed": 3,
-    "remainingDays": 22
-  }
-]
-```
-
-Example length-of-service response:
-
-```json
-{
-  "years": 4,
-  "months": 7
-}
-```
-
-## Example test coverage
-
-The current test verifies that:
-
-- a department is fetched through `DepartmentService`
-- the employee is assigned to that department
-- the repository `save()` method is called
-- the returned employee is not null
-
-This is a good example of how to test a service method with mocked dependencies.
-
-## Notes
-
-This repository is intended for testing and learning. It complements the main AtlasRH project and shows how to validate logic in a clean, isolated way before integrating with full application or database testing.
+The balance response reports each leave type's annual allowance, approved working days used in the current calendar year, and remaining balance. The service-length response reports completed years and remaining months since the employee's hire date.

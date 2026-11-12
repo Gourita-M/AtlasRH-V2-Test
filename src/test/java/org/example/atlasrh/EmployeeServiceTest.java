@@ -1,5 +1,7 @@
 package org.example.atlasrh;
 
+import org.example.atlasrh.controller.EmployeeController;
+import org.example.atlasrh.dto.EmployeeResponseDTO;
 import org.example.atlasrh.mapper.EmployeeMapper;
 import org.example.atlasrh.model.Contract;
 import org.example.atlasrh.model.Department;
@@ -13,13 +15,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class EmployeeServiceTest {
@@ -29,6 +33,9 @@ public class EmployeeServiceTest {
 
     @Mock
     private EmployeeMapper employeeMapper;
+
+    @Mock
+    private EmployeeController employeeController;
 
     @Mock
     private DepartmentService departmentService;
@@ -62,5 +69,23 @@ public class EmployeeServiceTest {
         assertEquals(contract, result.getContract());
 
         verify(employeeRepository).save(employee);
+    }
+
+    @Test
+    void GetAllEmployeesSuccessfully(){
+        Employee employee1 = new Employee();
+        Employee employee2 = new Employee();
+
+        List<Employee> employeeList = List.of(employee1, employee2);
+
+        when(employeeService.viewAll()).thenReturn(employeeList.stream().map(employeeMapper::toResponseDTO).toList());
+
+        ResponseEntity<List<EmployeeResponseDTO>> response = employeeController.getAll();
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(2, response.getBody().size());
+        assertEquals(employee1, response.getBody().get(0));
+        assertEquals(employee2, response.getBody().get(1));
+
+        verify(employeeService, times(1)).viewAll();
     }
 }

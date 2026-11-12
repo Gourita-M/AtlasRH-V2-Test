@@ -20,4 +20,5 @@ public interface EmployeeService {
 
     List<EmployeeResponseDTO> searchForEmployee(String name, Long departmentId, Pageable pageable);
 
+    List<EmployeeResponseDTO> getEmplyeeByMart(Long matr);
 }

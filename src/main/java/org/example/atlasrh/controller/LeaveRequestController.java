@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/leaverequest")
@@ -23,7 +24,7 @@ public class LeaveRequestController {
     //PostMan done
     @PostMapping
     @Operation(summary = "Create LeaveRequest")
-    public ResponseEntity<?> create(@RequestBody LeaveRequest leaveRequest,
+    public ResponseEntity<?> create(@Valid @RequestBody LeaveRequest leaveRequest,
                                     @RequestParam Long employeeId,
                                     @RequestParam Long leaveTypeId) {
         try {
@@ -165,4 +166,3 @@ public class LeaveRequestController {
         }
     }
 }
-

@@ -39,6 +39,10 @@ public class LeaveRequestServiceImpl implements LeaveRequestService{
 
     @Override
     public LeaveRequestResponseDTO create(LeaveRequest leaveRequest, Long employeeId, Long leaveTypeId){
+        if(leaveRequest.getStartDate().isAfter(leaveRequest.getEndDate())){
+            throw new IllegalArgumentException("Start Date is After End Date");
+        }
+
         LeaveType leavetype = leaveTypeRepository.findById(leaveTypeId).orElse(null);
         Employee employee = employeeRepository.findById(employeeId).orElse(null);
         if(leavetype == null || employee == null){
@@ -47,7 +51,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService{
             leaveRequestRepository.save(leaveRequest);
             return leaveRequestMapper.toResponseDTO(leaveRequest);
         }else {
-            return null;
+            throw new IllegalArgumentException("Leave Type or Employee is Null");
         }
     }
 
@@ -63,11 +67,12 @@ public class LeaveRequestServiceImpl implements LeaveRequestService{
     }
 
     @Override
-    public LeaveRequestResponseDTO viewLeaveRequest(Long id){
+    public LeaveRequest viewLeaveRequest(Long id){
         LeaveRequest leaveRequest = leaveRequestRepository
                 .findById(id).orElseThrow(() -> new RuntimeException("Leave Request not found"));
 
-        return leaveRequestMapper.toResponseDTO(leaveRequest);
+        return leaveRequest;
+        //return leaveRequestMapper.toResponseDTO(leaveRequest);
     }
 
     @Override

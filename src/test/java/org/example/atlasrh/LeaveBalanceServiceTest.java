@@ -123,8 +123,8 @@ class LeaveBalanceServiceTest {
         LocalDate end = endDate.isBefore(Year.now().atDay(Year.now().length()))
                 ? endDate : Year.now().atDay(Year.now().length());
         return start.datesUntil(end.plusDays(1))
-                .filter(day -> day.getDayOfWeek() != DayOfWeek.SATURDAY
-                        && day.getDayOfWeek() != DayOfWeek.SUNDAY)
+                .filter(day -> !day.getDayOfWeek().equals(DayOfWeek.SATURDAY)
+                        && !day.getDayOfWeek().equals(DayOfWeek.SUNDAY))
                 .count();
     }
 }

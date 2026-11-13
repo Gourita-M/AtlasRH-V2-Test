@@ -3,6 +3,7 @@ package org.example.atlasrh.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.atlasrh.Enum.LeaveStatus;
+import org.example.atlasrh.dto.LeaveRequestRequestDTO;
 import org.example.atlasrh.model.LeaveRequest;
 import org.example.atlasrh.service.LeaveRequestService;
 import org.springframework.data.domain.Pageable;
@@ -24,12 +25,12 @@ public class LeaveRequestController {
     //PostMan done
     @PostMapping
     @Operation(summary = "Create LeaveRequest")
-    public ResponseEntity<?> create(@Valid @RequestBody LeaveRequest leaveRequest,
+    public ResponseEntity<?> create(@Valid @RequestBody LeaveRequestRequestDTO request,
                                     @RequestParam Long employeeId,
                                     @RequestParam Long leaveTypeId) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(leaveRequestService.create(leaveRequest, employeeId, leaveTypeId));
+                    .body(leaveRequestService.create(request.toLeaveRequest(), employeeId, leaveTypeId));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(e.getMessage());
@@ -39,9 +40,10 @@ public class LeaveRequestController {
     //PostMan done
     @PutMapping("/{id}")
     @Operation(summary = "Update LeaveRequest")
-    public ResponseEntity<?> update(@PathVariable("id") Long id, @RequestBody LeaveRequest leaveRequest) {
+    public ResponseEntity<?> update(@PathVariable("id") Long id,
+                                    @Valid @RequestBody LeaveRequestRequestDTO request) {
         try {
-            return ResponseEntity.ok(leaveRequestService.update(id, leaveRequest));
+            return ResponseEntity.ok(leaveRequestService.update(id, request.toLeaveRequest()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }

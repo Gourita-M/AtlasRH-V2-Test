@@ -18,6 +18,7 @@ public class Contract {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "\"contractType\"" , nullable = false)
     private ContractType contractType;
 
@@ -30,7 +31,7 @@ public class Contract {
     @Column(nullable = false)
     private Long salary;
 
-    @OneToMany
+    @OneToMany(mappedBy = "contract")
     @Setter(AccessLevel.NONE)
     List<Employee> employee = new ArrayList<>();
 

@@ -17,6 +17,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -157,6 +158,28 @@ class ManagementControllersTest {
                         .queryParam("leaveTypeId", "2").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"startDate\":\"2026-12-01\",\"endDate\":\"2026-12-02\",\"reason\":\"Holiday\"}"))
                 .andExpect(status().isConflict());
+    }
+
+    @Test
+    void leaveRequestUpdateDoesNotBindClientControlledDecisionOrOwnership() throws Exception {
+        when(leaveRequestService.update(eq(4L), any())).thenAnswer(invocation -> {
+            LeaveRequest update = invocation.getArgument(1);
+            assertNull(update.getId());
+            assertNull(update.getStatus());
+            assertNull(update.getDecisionComment());
+            assertNull(update.getEmployee());
+            assertNull(update.getLeavetype());
+            return leaveRequestDto();
+        });
+
+        mockMvc.perform(put("/api/leaverequest/4").contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"id":99,"startDate":"2026-12-01","endDate":"2026-12-02",
+                                 "reason":"Holiday","status":"APPROVED","decisionComment":"Injected",
+                                 "employee":{"matricule":88},"leavetype":{"id":7}}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reason").value("Holiday"));
     }
 
     @Test

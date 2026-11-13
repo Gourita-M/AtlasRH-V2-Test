@@ -26,7 +26,8 @@ public class LeaveTypeServiceImpl implements LeaveTypeService {
 
     @Override
     public LeaveType viewLeaveType(Long id){
-        return leaveTypeRepository.findById(id).orElseThrow(() -> new RuntimeException("LeaveType Can't be Found"));
+        return leaveTypeRepository.findById(Math.toIntExact(id))
+                .orElseThrow(() -> new RuntimeException("LeaveType Can't be Found"));
     }
 
     @Override

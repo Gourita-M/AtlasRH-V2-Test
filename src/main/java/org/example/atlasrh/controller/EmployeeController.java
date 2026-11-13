@@ -3,6 +3,7 @@ package org.example.atlasrh.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.atlasrh.dto.EmployeeResponseDTO;
+import org.example.atlasrh.dto.EmployeeRequestDTO;
 import org.example.atlasrh.model.Employee;
 import org.example.atlasrh.service.EmployeeService;
 import org.springframework.http.HttpStatus;
@@ -33,11 +34,11 @@ public class EmployeeController {
     //PostMan done
     @PostMapping
     @Operation(summary = "Create Employee")
-    public ResponseEntity<?> create(@Valid @RequestBody Employee employee,
+    public ResponseEntity<?> create(@Valid @RequestBody EmployeeRequestDTO request,
                                     @RequestParam Long departmentId,
                                     @RequestParam Long contractId){
         try {
-            Employee created = employeeService.create(employee, departmentId, contractId);
+            Employee created = employeeService.create(request.toEmployee(), departmentId, contractId);
 
             return ResponseEntity
                     .status(HttpStatus.CREATED)

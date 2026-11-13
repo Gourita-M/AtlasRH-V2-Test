@@ -56,16 +56,17 @@ This command waits for the configured Quality Gate and fails if it does not pass
 
 The tests exercise employee number/email uniqueness, self-manager rejection, active-contract constraints, leave working-day and balance calculations, leave approval/rejection/cancellation, HTTP validation and response statuses, employee filtering and pagination/sorting, and two full-stack scenarios.
 
-Fixes made alongside the tests include enforcing employee uniqueness and manager rules, selecting active contracts correctly, validating leave request references, implementing employee/leave-request search paths, preventing cancellation of decided requests, and correcting DTO mapping by binding Lombok and MapStruct annotation processing.
+Fixes made alongside the tests include enforcing employee uniqueness and manager rules, selecting active contracts correctly, validating leave request references, implementing employee/leave-request search paths, preventing cancellation of decided requests, correcting DTO mapping by binding Lombok and MapStruct annotation processing, using validated request DTOs instead of binding JPA entities, preserving leave ownership/decision fields on update, and using value-based `DayOfWeek` comparisons.
 
 | Measure | Before | After |
 |---|---:|---:|
-| Automated tests | 10, with 1 failing | 56 passing, 0 skipped |
-| JaCoCo line coverage | Not configured | 93.2% (80% minimum enforced) |
-| JaCoCo instruction coverage | Not configured | 89.5% |
-| SonarQube findings / Quality Gate | Not analyzed | Pending: no local server was reachable at `localhost:9000` |
+| Automated tests | 10, with 1 failing | 64 passing, 0 skipped |
+| JaCoCo line coverage | Not configured | 92.6% (80% minimum enforced) |
+| JaCoCo instruction coverage | Not configured | 90.2% |
+| JaCoCo branch coverage | Not configured | 69.1% |
+| SonarQube findings / Quality Gate | Initial scan: 4 bugs, 6 vulnerabilities | 0 bugs, 0 vulnerabilities, 0 code smells, 0 security hotspots; Quality Gate passed |
 
-Refresh coverage results using `./mvnw clean verify`. SonarQube results depend on the configured server profile and Quality Gate and should be recorded after the analysis has run.
+Refresh coverage results using `./mvnw clean verify`. The detailed results/fixes are in the [testing and quality report](./TESTING-QUALITY-REPORT.md), and the [presentation outline](./PRESENTATION-OUTLINE.md) provides the 15-minute demo flow. The [Jira planning draft](./JIRA-PLAN.md) is not posted to a Jira board.
 
 Before applying the model changes to an existing database, check for duplicate employee emails and plan the migration of enum columns and the employee-contract/manager relationships. Tests create a fresh H2 schema and do not migrate or modify any application database.
 

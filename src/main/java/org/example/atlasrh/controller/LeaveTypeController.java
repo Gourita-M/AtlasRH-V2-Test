@@ -2,7 +2,8 @@ package org.example.atlasrh.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.example.atlasrh.model.LeaveType;
+import jakarta.validation.Valid;
+import org.example.atlasrh.dto.LeaveTypeRequestDTO;
 import org.example.atlasrh.service.LeaveTypeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,10 +22,10 @@ public class LeaveTypeController {
     //PostMan done
     @PostMapping
     @Operation(summary = "Create LeaveType")
-    public ResponseEntity<?> create(@RequestBody LeaveType leaveType) {
+    public ResponseEntity<?> create(@Valid @RequestBody LeaveTypeRequestDTO request) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(leaveTypeService.create(leaveType));
+                    .body(leaveTypeService.create(request.toLeaveType()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }

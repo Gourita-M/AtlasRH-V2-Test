@@ -219,4 +219,30 @@ class LeaveRequestServiceTest {
         assertThrows(IllegalStateException.class, () -> leaveRequestService.getLengthOfService(2L));
         assertThrows(IllegalArgumentException.class, () -> leaveRequestService.getLengthOfService(3L));
     }
+
+    @Test
+    void updatesOnlyEditableFieldsAndPreservesRequestDecisionAndOwnership() {
+        Employee owner = new Employee();
+        LeaveType leaveType = new LeaveType("Annual", 20L);
+        LeaveRequest existing = new LeaveRequest(LocalDate.now(), LocalDate.now().plusDays(2),
+                "Old reason", LeaveStatus.APPROVED);
+        existing.setEmployee(owner);
+        existing.setLeavetype(leaveType);
+        existing.setDecisionComment("Approved");
+        LeaveRequest changes = new LeaveRequest(LocalDate.now().plusDays(5),
+                LocalDate.now().plusDays(6), "Updated reason", null);
+        LeaveRequestResponseDTO response = new LeaveRequestResponseDTO(2L,
+                changes.getStartDate(), changes.getEndDate(), changes.getReason(), "Approved");
+        when(leaveRequestRepository.findById(2L)).thenReturn(Optional.of(existing));
+        when(leaveRequestRepository.save(existing)).thenReturn(existing);
+        when(leaveRequestMapper.toResponseDTO(existing)).thenReturn(response);
+
+        assertEquals(response, leaveRequestService.update(2L, changes));
+        assertSame(owner, existing.getEmployee());
+        assertSame(leaveType, existing.getLeavetype());
+        assertEquals(LeaveStatus.APPROVED, existing.getStatus());
+        assertEquals("Approved", existing.getDecisionComment());
+        assertEquals("Updated reason", existing.getReason());
+        verify(leaveRequestRepository).save(existing);
+    }
 }

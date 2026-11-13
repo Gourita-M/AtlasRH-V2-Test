@@ -1,6 +1,5 @@
 package org.example.atlasrh.service;
 
-import org.example.atlasrh.Enum.RoleType;
 import org.example.atlasrh.dto.EmployeeResponseDTO;
 import org.example.atlasrh.mapper.EmployeeMapper;
 import org.example.atlasrh.model.Contract;
@@ -34,12 +33,23 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public Employee create(Employee employee, Long departmentId, Long contractId) {
+        if (employee == null) {
+            throw new IllegalArgumentException("Employee is required");
+        }
+        if (employee.getMatricule() != 0 && employeeRepository.existsById(employee.getMatricule())) {
+            throw new IllegalArgumentException("Employee number already exists");
+        }
+        if (employeeRepository.existsByEmail(employee.getEmail())) {
+            throw new IllegalArgumentException("Employee email already exists");
+        }
+
+        validateAndResolveManager(employee, null);
 
         Department department = departmentService.viewDepartment(departmentId);
         Contract contract = contractRepository.findById(contractId).orElse(null);
 
-        if(department == null || contract == null){
-            return null;
+        if (department == null || contract == null) {
+            throw new IllegalArgumentException("Department or contract was not found");
         }
         employee.setDepartment(department);
         employee.setContract(contract);
@@ -53,6 +63,18 @@ public class EmployeeServiceImpl implements EmployeeService {
          Employee existingEmployee = employeeRepository.findById(id)
                  .orElseThrow(() ->
                          new RuntimeException("Employee not found: " + id));
+
+         if (employeeRepository.existsByEmailAndMatriculeNot(employee.getEmail(), id)) {
+             throw new IllegalArgumentException("Employee email already exists");
+         }
+         validateAndResolveManager(employee, id);
+         existingEmployee.setFirstName(employee.getFirstName());
+         existingEmployee.setLastName(employee.getLastName());
+         existingEmployee.setEmail(employee.getEmail());
+         existingEmployee.setJobTitle(employee.getJobTitle());
+         existingEmployee.setHireDate(employee.getHireDate());
+         existingEmployee.setRole(employee.getRole());
+         existingEmployee.setManager(employee.getManager());
 
          Employee updatedEmployee = employeeRepository.save(existingEmployee);
 
@@ -77,22 +99,42 @@ public class EmployeeServiceImpl implements EmployeeService {
 
      @Override
      public List<EmployeeResponseDTO> viewAllByManager(Long managerId){
-        return employeeRepository.findAll().stream()
-                .filter(e -> e.getRole().equals(RoleType.MANAGER))
+        return employeeRepository.findAllByManager_Matricule(managerId).stream()
                 .map(employeeMapper::toResponseDTO)
                 .toList();
      }
 
      @Override
      public List<EmployeeResponseDTO> searchForEmployee(String name, Long departmentId, Pageable pageable){
-        return null;
+        return employeeRepository.searchEmployees(name == null ? "" : name.trim(),
+                        departmentId, pageable)
+                .map(employeeMapper::toResponseDTO)
+                .toList();
      }
 
      @Override
      public List<EmployeeResponseDTO> getEmplyeeByMart(Long matr){
-        return employeeRepository.findAll().stream()
-                .filter(e -> matr.equals(e.getMatricule()))
+        return employeeRepository.findById(matr)
                 .map(employeeMapper::toResponseDTO)
+                .stream()
                 .toList();
+     }
+
+     private void validateAndResolveManager(Employee employee, Long employeeId) {
+         Employee manager = employee.getManager();
+         if (manager == null) {
+             return;
+         }
+         if (manager == employee
+                 || (employeeId != null && manager.getMatricule() == employeeId)
+                 || (employeeId == null && employee.getMatricule() != 0
+                     && manager.getMatricule() == employee.getMatricule())) {
+             throw new IllegalArgumentException("An employee cannot be their own manager");
+         }
+         if (manager.getMatricule() == 0) {
+             throw new IllegalArgumentException("A manager must have an employee number");
+         }
+         employee.setManager(employeeRepository.findById(manager.getMatricule())
+                 .orElseThrow(() -> new IllegalArgumentException("Manager was not found")));
      }
 }

@@ -3,11 +3,12 @@ package org.example.atlasrh.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.atlasrh.dto.DepartmentResponseDTO;
-import org.example.atlasrh.model.Department;
+import org.example.atlasrh.dto.DepartmentRequestDTO;
 import org.example.atlasrh.service.DepartmentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 
 @RestController
@@ -30,9 +31,9 @@ public class DepartmentController {
     //PostMan done
     @PostMapping
     @Operation(summary = "Create Department")
-    public ResponseEntity<?> save(@RequestBody Department department) {
+    public ResponseEntity<?> save(@Valid @RequestBody DepartmentRequestDTO request) {
         try{
-            DepartmentResponseDTO dto = departmentService.create(department);
+            DepartmentResponseDTO dto = departmentService.create(request.toDepartment());
             return ResponseEntity.status(HttpStatus.CREATED).body(dto);
         }catch (Exception e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

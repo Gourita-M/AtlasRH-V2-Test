@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LeaveRequestServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AtlasRH</a> &gt; <a href="index.source.html" class="el_package">org.example.atlasrh.service</a> &gt; <span class="el_source">LeaveRequestServiceImpl.java</span></div><h1>LeaveRequestServiceImpl.java</h1><pre class="source lang-java linenums">package org.example.atlasrh.service;
+
+import org.example.atlasrh.Enum.LeaveStatus;
+import org.example.atlasrh.Enum.RoleType;
+import org.example.atlasrh.dto.LeaveBalanceResponseDTO;
+import org.example.atlasrh.dto.LengthOfServiceResponseDTO;
+import org.example.atlasrh.dto.LeaveRequestResponseDTO;
+import org.example.atlasrh.mapper.LeaveRequestMapper;
+import org.example.atlasrh.model.Employee;
+import org.example.atlasrh.model.LeaveRequest;
+import org.example.atlasrh.model.LeaveType;
+import org.example.atlasrh.repository.EmployeeRepository;
+import org.example.atlasrh.repository.LeaveRequestRepository;
+import org.example.atlasrh.repository.LeaveTypeRepository;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.Year;
+
+@Service
+public class LeaveRequestServiceImpl implements LeaveRequestService{
+    private final LeaveRequestRepository leaveRequestRepository;
+    private final EmployeeRepository employeeRepository;
+    private final LeaveTypeRepository leaveTypeRepository;
+    private final LeaveRequestMapper leaveRequestMapper;
+
+    public LeaveRequestServiceImpl(LeaveRequestRepository leaveRequestRepository, EmployeeRepository employeeRepository,
+<span class="fc" id="L33">                                   LeaveTypeRepository leaveTypeRepository, LeaveRequestMapper leaveRequestMapper) {</span>
+<span class="fc" id="L34">        this.leaveRequestRepository = leaveRequestRepository;</span>
+<span class="fc" id="L35">        this.employeeRepository = employeeRepository;</span>
+<span class="fc" id="L36">        this.leaveTypeRepository = leaveTypeRepository;</span>
+<span class="fc" id="L37">        this.leaveRequestMapper = leaveRequestMapper;</span>
+<span class="fc" id="L38">    }</span>
+
+    @Override
+    public LeaveRequestResponseDTO create(LeaveRequest leaveRequest, Long employeeId, Long leaveTypeId){
+<span class="pc bpc" id="L42" title="2 of 4 branches missed.">        if (leaveRequest == null || leaveRequest.getStartDate() == null</span>
+<span class="pc bpc" id="L43" title="1 of 2 branches missed.">                || leaveRequest.getEndDate() == null</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">                || leaveRequest.getStartDate().isAfter(leaveRequest.getEndDate())) {</span>
+<span class="fc" id="L45">            throw new IllegalArgumentException(&quot;Start Date is After End Date&quot;);</span>
+        }
+
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">        LeaveType leavetype = leaveTypeId == null ? null</span>
+<span class="fc" id="L49">                : leaveTypeRepository.findById(Math.toIntExact(leaveTypeId)).orElse(null);</span>
+<span class="pc bpc" id="L50" title="1 of 2 branches missed.">        Employee employee = employeeId == null ? null : employeeRepository.findById(employeeId).orElse(null);</span>
+<span class="pc bpc" id="L51" title="2 of 4 branches missed.">        if (leavetype == null || employee == null) {</span>
+<span class="nc" id="L52">            throw new IllegalArgumentException(&quot;Leave Type or Employee is Null&quot;);</span>
+        }
+<span class="fc" id="L54">        leaveRequest.setEmployee(employee);</span>
+<span class="fc" id="L55">        leaveRequest.setLeavetype(leavetype);</span>
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">        if (leaveRequest.getStatus() == null) {</span>
+<span class="fc" id="L57">            leaveRequest.setStatus(LeaveStatus.PENDING);</span>
+        }
+<span class="fc" id="L59">        LeaveRequest saved = leaveRequestRepository.save(leaveRequest);</span>
+<span class="fc" id="L60">        return leaveRequestMapper.toResponseDTO(saved);</span>
+    }
+
+    @Override
+    public LeaveRequestResponseDTO update(Long id, LeaveRequest leaveRequest){
+<span class="pc bpc" id="L65" title="2 of 4 branches missed.">        if (leaveRequest == null || leaveRequest.getStartDate() == null</span>
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">                || leaveRequest.getEndDate() == null</span>
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">                || leaveRequest.getStartDate().isAfter(leaveRequest.getEndDate())) {</span>
+<span class="nc" id="L68">            throw new IllegalArgumentException(&quot;Leave request dates are invalid&quot;);</span>
+        }
+<span class="fc" id="L70">        Optional&lt;LeaveRequest&gt; leaveReq = leaveRequestRepository.findById(id);</span>
+<span class="fc bfc" id="L71" title="All 2 branches covered.">        if(leaveReq.isPresent()){</span>
+<span class="fc" id="L72">            LeaveRequest existing = leaveReq.get();</span>
+<span class="fc" id="L73">            existing.setStartDate(leaveRequest.getStartDate());</span>
+<span class="fc" id="L74">            existing.setEndDate(leaveRequest.getEndDate());</span>
+<span class="fc" id="L75">            existing.setReason(leaveRequest.getReason());</span>
+<span class="fc" id="L76">            LeaveRequest saved = leaveRequestRepository.save(existing);</span>
+<span class="fc" id="L77">            return leaveRequestMapper.toResponseDTO(saved);</span>
+        }else{
+<span class="fc" id="L79">            return null;</span>
+        }
+    }
+
+    @Override
+    public LeaveRequest viewLeaveRequest(Long id){
+<span class="fc" id="L85">        LeaveRequest leaveRequest = leaveRequestRepository</span>
+<span class="fc" id="L86">                .findById(id).orElseThrow(() -&gt; new RuntimeException(&quot;Leave Request not found&quot;));</span>
+
+<span class="fc" id="L88">        return leaveRequest;</span>
+        //return leaveRequestMapper.toResponseDTO(leaveRequest);
+    }
+
+    @Override
+    public List&lt;LeaveRequestResponseDTO&gt; viewAll(){
+<span class="fc" id="L94">        return leaveRequestRepository.findAll()</span>
+<span class="fc" id="L95">                .stream().map(leaveRequestMapper::toResponseDTO).toList();</span>
+    }
+
+    @Override
+    public List&lt;LeaveRequestResponseDTO&gt; getRequests(Long employeeId, Pageable pageable) {
+<span class="fc" id="L100">        return leaveRequestRepository.findAllByEmployee_Matricule(employeeId, pageable)</span>
+<span class="fc" id="L101">                .map(leaveRequestMapper::toResponseDTO)</span>
+<span class="fc" id="L102">                .toList();</span>
+    }
+
+    @Override
+    public List&lt;LeaveRequestResponseDTO&gt; getMyRequestsByStatus(Long employeeId, LeaveStatus status, Pageable pageable){
+<span class="fc" id="L107">        return leaveRequestRepository.findAllByEmployee_MatriculeAndStatus(employeeId, status, pageable)</span>
+<span class="fc" id="L108">                .map(leaveRequestMapper::toResponseDTO)</span>
+<span class="fc" id="L109">                .toList();</span>
+    }
+
+    @Override
+    public List&lt;LeaveBalanceResponseDTO&gt; getLeaveBalances(Long employeeId) {
+<span class="fc" id="L114">        requireEmployee(employeeId);</span>
+<span class="fc" id="L115">        Year currentYear = Year.now();</span>
+<span class="fc" id="L116">        LocalDate yearStart = currentYear.atDay(1);</span>
+<span class="fc" id="L117">        LocalDate yearEnd = currentYear.atDay(currentYear.length());</span>
+<span class="fc" id="L118">        List&lt;LeaveRequest&gt; approvedRequests = leaveRequestRepository</span>
+<span class="fc" id="L119">                .findAllByEmployee_MatriculeAndStatus(employeeId, LeaveStatus.APPROVED);</span>
+
+<span class="fc" id="L121">        return leaveTypeRepository.findAll().stream()</span>
+<span class="fc" id="L122">                .map(leaveType -&gt; {</span>
+<span class="fc" id="L123">                    long approvedDaysUsed = approvedRequests.stream()</span>
+<span class="pc bpc" id="L124" title="1 of 2 branches missed.">                            .filter(request -&gt; request.getLeavetype() != null</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">                                    &amp;&amp; request.getLeavetype().getId().equals(leaveType.getId()))</span>
+<span class="fc" id="L126">                            .mapToLong(request -&gt; countWorkingDaysInPeriod(</span>
+<span class="fc" id="L127">                                    request.getStartDate(), request.getEndDate(), yearStart, yearEnd))</span>
+<span class="fc" id="L128">                            .sum();</span>
+<span class="fc" id="L129">                    return new LeaveBalanceResponseDTO(</span>
+<span class="fc" id="L130">                            leaveType.getId(),</span>
+<span class="fc" id="L131">                            leaveType.getName(),</span>
+<span class="fc" id="L132">                            leaveType.getAnnualallowancedays(),</span>
+                            approvedDaysUsed,
+<span class="fc" id="L134">                            leaveType.getAnnualallowancedays() - approvedDaysUsed</span>
+                    );
+                })
+<span class="fc" id="L137">                .toList();</span>
+    }
+
+    @Override
+    public LengthOfServiceResponseDTO getLengthOfService(Long employeeId) {
+<span class="fc" id="L142">        Employee employee = requireEmployee(employeeId);</span>
+<span class="fc" id="L143">        LocalDate today = LocalDate.now();</span>
+<span class="fc bfc" id="L144" title="All 4 branches covered.">        if (employee.getHireDate() == null || employee.getHireDate().isAfter(today)) {</span>
+<span class="fc" id="L145">            throw new IllegalStateException(&quot;Employee has an invalid hire date: &quot; + employeeId);</span>
+        }
+
+<span class="fc" id="L148">        Period servicePeriod = Period.between(employee.getHireDate(), today);</span>
+<span class="fc" id="L149">        return new LengthOfServiceResponseDTO(servicePeriod.getYears(), servicePeriod.getMonths());</span>
+    }
+
+    private Employee requireEmployee(Long employeeId) {
+<span class="pc bpc" id="L153" title="1 of 2 branches missed.">        if (employeeId == null) {</span>
+<span class="nc" id="L154">            throw new IllegalArgumentException(&quot;Employee ID is required&quot;);</span>
+        }
+<span class="fc" id="L156">        return employeeRepository.findById(employeeId)</span>
+<span class="fc" id="L157">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Employee not found: &quot; + employeeId));</span>
+    }
+
+    private long countWorkingDaysInPeriod(LocalDate startDate, LocalDate endDate,
+                                          LocalDate periodStart, LocalDate periodEnd) {
+<span class="fc bfc" id="L162" title="All 2 branches covered.">        LocalDate start = startDate.isAfter(periodStart) ? startDate : periodStart;</span>
+<span class="pc bpc" id="L163" title="1 of 2 branches missed.">        LocalDate end = endDate.isBefore(periodEnd) ? endDate : periodEnd;</span>
+<span class="pc bpc" id="L164" title="1 of 2 branches missed.">        if (start.isAfter(end)) {</span>
+<span class="nc" id="L165">            return 0;</span>
+        }
+
+<span class="fc" id="L168">        long workingDays = 0;</span>
+<span class="fc bfc" id="L169" title="All 2 branches covered.">        for (LocalDate day = start; !day.isAfter(end); day = day.plusDays(1)) {</span>
+<span class="fc" id="L170">            DayOfWeek dayOfWeek = day.getDayOfWeek();</span>
+<span class="fc bfc" id="L171" title="All 4 branches covered.">            if (!dayOfWeek.equals(DayOfWeek.SATURDAY) &amp;&amp; !dayOfWeek.equals(DayOfWeek.SUNDAY)) {</span>
+<span class="fc" id="L172">                workingDays++;</span>
+            }
+        }
+<span class="fc" id="L175">        return workingDays;</span>
+    }
+
+    @Override
+    public boolean cancelRequest(Long employeeId, Long requestId) {
+<span class="fc" id="L180">        LeaveRequest leaveRequest = leaveRequestRepository.findByIdAndEmployee_Matricule(requestId, employeeId);</span>
+<span class="fc bfc" id="L181" title="All 4 branches covered.">        if (leaveRequest != null &amp;&amp; leaveRequest.getStatus() == LeaveStatus.PENDING) {</span>
+<span class="fc" id="L182">            leaveRequest.setStatus(LeaveStatus.CANCELLED);</span>
+<span class="fc" id="L183">            leaveRequestRepository.save(leaveRequest);</span>
+<span class="fc" id="L184">            return true;</span>
+        }else{
+<span class="fc" id="L186">            return false;</span>
+        }
+    }
+
+    @Override
+    public boolean approveRequest(Long managerId, Long requestId, String comment){
+<span class="pc bpc" id="L192" title="1 of 4 branches missed.">        if (requestId == null || !isManager(managerId)) {</span>
+<span class="fc" id="L193">            return false;</span>
+        }
+
+<span class="fc" id="L196">        LeaveRequest leaveRequest = leaveRequestRepository.findById(requestId).orElse(null);</span>
+<span class="pc bpc" id="L197" title="1 of 4 branches missed.">        if (leaveRequest == null || leaveRequest.getStatus() != LeaveStatus.PENDING) {</span>
+<span class="fc" id="L198">            return false;</span>
+        }
+
+<span class="fc" id="L201">        leaveRequest.setStatus(LeaveStatus.APPROVED);</span>
+<span class="fc" id="L202">        leaveRequest.setDecisionComment(normalizeComment(comment));</span>
+<span class="fc" id="L203">        leaveRequestRepository.save(leaveRequest);</span>
+<span class="fc" id="L204">        return true;</span>
+    }
+
+    @Override
+    public boolean rejectRequest(Long managerId, Long requestId, String comment){
+<span class="fc" id="L209">        String decisionComment = normalizeComment(comment);</span>
+<span class="pc bpc" id="L210" title="2 of 6 branches missed.">        if (requestId == null || !isManager(managerId) || decisionComment == null) {</span>
+<span class="fc" id="L211">            return false;</span>
+        }
+
+<span class="fc" id="L214">        LeaveRequest leaveRequest = leaveRequestRepository.findById(requestId).orElse(null);</span>
+<span class="pc bpc" id="L215" title="2 of 4 branches missed.">        if (leaveRequest == null || leaveRequest.getStatus() != LeaveStatus.PENDING) {</span>
+<span class="nc" id="L216">            return false;</span>
+        }
+
+<span class="fc" id="L219">        leaveRequest.setStatus(LeaveStatus.REJECTED);</span>
+<span class="fc" id="L220">        leaveRequest.setDecisionComment(decisionComment);</span>
+<span class="fc" id="L221">        leaveRequestRepository.save(leaveRequest);</span>
+<span class="fc" id="L222">        return true;</span>
+    }
+
+    private boolean isManager(Long managerId) {
+<span class="pc bpc" id="L226" title="1 of 2 branches missed.">        return managerId != null</span>
+<span class="fc" id="L227">                &amp;&amp; employeeRepository.findById(managerId)</span>
+<span class="fc bfc" id="L228" title="All 2 branches covered.">                .map(manager -&gt; manager.getRole() == RoleType.MANAGER)</span>
+<span class="fc bfc" id="L229" title="All 2 branches covered.">                .orElse(false);</span>
+    }
+
+    private String normalizeComment(String comment) {
+<span class="pc bpc" id="L233" title="1 of 4 branches missed.">        if (comment == null || comment.isBlank()) {</span>
+<span class="fc" id="L234">            return null;</span>
+        }
+<span class="fc" id="L236">        return comment.trim();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

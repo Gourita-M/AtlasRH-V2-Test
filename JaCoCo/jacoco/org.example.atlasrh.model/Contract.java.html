@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Contract.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AtlasRH</a> &gt; <a href="index.source.html" class="el_package">org.example.atlasrh.model</a> &gt; <span class="el_source">Contract.java</span></div><h1>Contract.java</h1><pre class="source lang-java linenums">package org.example.atlasrh.model;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = &quot;contract&quot;)
+<span class="pc" id="L12">@Setter</span>
+@Getter
+<span class="nc" id="L14">@ToString</span>
+public class Contract {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+<span class="fc" id="L19">    private Long id;</span>
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = &quot;\&quot;contractType\&quot;&quot; , nullable = false)
+<span class="fc" id="L23">    private ContractType contractType;</span>
+
+    @Column(name = &quot;\&quot;startDate\&quot;&quot; , nullable = false)
+<span class="fc" id="L26">    private LocalDate startDate;</span>
+
+    @Column(name = &quot;\&quot;endDate\&quot;&quot; , nullable = false)
+<span class="fc" id="L29">    private LocalDate endDate;</span>
+
+    @Column(nullable = false)
+<span class="fc" id="L32">    private Long salary;</span>
+
+<span class="fc" id="L34">    @OneToMany(mappedBy = &quot;contract&quot;)</span>
+    @Setter(AccessLevel.NONE)
+<span class="fc" id="L36">    List&lt;Employee&gt; employee = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L38">    public Contract(){}</span>
+<span class="fc" id="L39">    public Contract(ContractType contractType, LocalDate startDate, LocalDate endDate, Long salary) {</span>
+<span class="fc" id="L40">        this.contractType = contractType;</span>
+<span class="fc" id="L41">        this.startDate = startDate;</span>
+<span class="fc" id="L42">        this.endDate = endDate;</span>
+<span class="fc" id="L43">        this.salary = salary;</span>
+<span class="fc" id="L44">    }</span>
+
+<span class="fc" id="L46">    public enum ContractType{</span>
+<span class="fc" id="L47">        CDI,</span>
+<span class="fc" id="L48">        CDD,</span>
+<span class="fc" id="L49">        STAGE</span>
+    }
+
+    public void setEmployee(Employee employee) {
+<span class="fc" id="L53">        this.employee.add(employee);</span>
+<span class="fc" id="L54">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

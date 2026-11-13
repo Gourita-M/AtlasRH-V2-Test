@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ContractController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AtlasRH</a> &gt; <a href="index.source.html" class="el_package">org.example.atlasrh.controller</a> &gt; <span class="el_source">ContractController.java</span></div><h1>ContractController.java</h1><pre class="source lang-java linenums">package org.example.atlasrh.controller;
+
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.example.atlasrh.dto.ContractRequestDTO;
+import org.example.atlasrh.service.ContractService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping(&quot;/api/contract&quot;)
+@Tag(name = &quot;Contract&quot;, description = &quot;Contract management&quot;)
+public class ContractController {
+    private final ContractService contractService;
+
+<span class="fc" id="L19">    public ContractController(ContractService contractService){</span>
+<span class="fc" id="L20">        this.contractService = contractService;</span>
+<span class="fc" id="L21">    }</span>
+
+    //PostMan done
+    @GetMapping
+    @Operation(summary = &quot;Get all Contracts&quot;)
+    public ResponseEntity&lt;?&gt; getAll(){
+        try{
+<span class="fc" id="L28">            return ResponseEntity.ok(contractService.viewAll());</span>
+<span class="fc" id="L29">        }catch (Exception e){</span>
+<span class="fc" id="L30">            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());</span>
+        }
+    }
+
+    //PostMan done
+    @PostMapping(&quot;/{id}&quot;)
+    @Operation(summary = &quot;Create Contract&quot;)
+    public ResponseEntity&lt;?&gt; save(@Valid @RequestBody ContractRequestDTO request,
+                                  @PathVariable(&quot;id&quot;) Long id){
+        try{
+<span class="fc" id="L40">                return ResponseEntity.status(HttpStatus.CREATED)</span>
+<span class="fc" id="L41">                        .body(contractService.create(request.toContract(), id));</span>
+<span class="fc" id="L42">        }catch(Exception e){</span>
+<span class="fc" id="L43">            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

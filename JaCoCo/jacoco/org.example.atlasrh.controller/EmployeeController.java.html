@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmployeeController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AtlasRH</a> &gt; <a href="index.source.html" class="el_package">org.example.atlasrh.controller</a> &gt; <span class="el_source">EmployeeController.java</span></div><h1>EmployeeController.java</h1><pre class="source lang-java linenums">package org.example.atlasrh.controller;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.example.atlasrh.dto.EmployeeResponseDTO;
+import org.example.atlasrh.dto.EmployeeRequestDTO;
+import org.example.atlasrh.model.Employee;
+import org.example.atlasrh.service.EmployeeService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping(&quot;/api/employee&quot;)
+@Tag(name = &quot;Employee&quot;, description = &quot;Employee Management&quot;)
+public class EmployeeController {
+    private final EmployeeService employeeService;
+
+<span class="fc" id="L22">    public EmployeeController(EmployeeService employeeService){</span>
+<span class="fc" id="L23">        this.employeeService = employeeService;</span>
+<span class="fc" id="L24">    }</span>
+
+    //PostMan done
+    @GetMapping
+    @Operation(summary = &quot;Get All Employs&quot;)
+    public ResponseEntity&lt;List&lt;EmployeeResponseDTO&gt;&gt; getAll(){
+
+<span class="fc" id="L31">        return ResponseEntity.ok(employeeService.viewAll());</span>
+    }
+
+    //PostMan done
+    @PostMapping
+    @Operation(summary = &quot;Create Employee&quot;)
+    public ResponseEntity&lt;?&gt; create(@Valid @RequestBody EmployeeRequestDTO request,
+                                    @RequestParam Long departmentId,
+                                    @RequestParam Long contractId){
+        try {
+<span class="fc" id="L41">            Employee created = employeeService.create(request.toEmployee(), departmentId, contractId);</span>
+
+<span class="fc" id="L43">            return ResponseEntity</span>
+<span class="fc" id="L44">                    .status(HttpStatus.CREATED)</span>
+<span class="fc" id="L45">                    .body(created);</span>
+
+<span class="fc" id="L47">        } catch (IllegalArgumentException e) {</span>
+<span class="fc" id="L48">            return ResponseEntity</span>
+<span class="fc" id="L49">                    .status(HttpStatus.CONFLICT)</span>
+<span class="fc" id="L50">                    .body(e.getMessage());</span>
+        }
+    }
+
+    //PostMan done
+    @GetMapping(&quot;/{id}&quot;)
+    @Operation(summary = &quot;Get Employee By ID&quot;)
+    public ResponseEntity&lt;?&gt; viewEmployee(@PathVariable(&quot;id&quot;) Long id){
+        try{
+<span class="nc" id="L59">            return ResponseEntity.ok(employeeService.viewEmployee(id));</span>
+<span class="fc" id="L60">        }catch (Exception e){</span>
+<span class="fc" id="L61">            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

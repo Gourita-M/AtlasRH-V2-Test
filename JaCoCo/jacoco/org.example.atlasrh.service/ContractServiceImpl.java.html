@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ContractServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AtlasRH</a> &gt; <a href="index.source.html" class="el_package">org.example.atlasrh.service</a> &gt; <span class="el_source">ContractServiceImpl.java</span></div><h1>ContractServiceImpl.java</h1><pre class="source lang-java linenums">package org.example.atlasrh.service;
+
+import org.example.atlasrh.dto.ContractResponseDTO;
+import org.example.atlasrh.mapper.*;
+import org.example.atlasrh.model.Contract;
+import org.example.atlasrh.model.Employee;
+import org.example.atlasrh.repository.ContractRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class ContractServiceImpl implements ContractService{
+    private final ContractRepository contractRepository;
+    private final ContractMapper contractMapper;
+    private final EmployeeService employeeService;
+
+    public ContractServiceImpl(ContractRepository contractRepository,
+                               ContractMapper contractMapper,
+<span class="fc" id="L23">                               EmployeeService employeeService){</span>
+<span class="fc" id="L24">        this.contractRepository = contractRepository;</span>
+<span class="fc" id="L25">        this.contractMapper = contractMapper;</span>
+<span class="fc" id="L26">        this.employeeService = employeeService;</span>
+<span class="fc" id="L27">    }</span>
+
+    @Override
+    @Transactional
+    public ContractResponseDTO create(Contract contract, Long id){
+<span class="fc" id="L32">        Employee employee = employeeService.viewEmployee(id);</span>
+
+<span class="pc bpc" id="L34" title="2 of 4 branches missed.">        if (contract.getStartDate() == null || contract.getEndDate() == null</span>
+<span class="fc bfc" id="L35" title="All 2 branches covered.">                || contract.getStartDate().isAfter(contract.getEndDate())) {</span>
+<span class="fc" id="L36">            throw new IllegalArgumentException(&quot;Contract dates are invalid&quot;);</span>
+        }
+<span class="fc" id="L38">        LocalDate today = LocalDate.now();</span>
+<span class="fc" id="L39">        Contract current = employee.getContract();</span>
+<span class="fc bfc" id="L40" title="All 2 branches covered.">        if (current != null</span>
+<span class="pc bpc" id="L41" title="1 of 2 branches missed.">                &amp;&amp; !current.getStartDate().isAfter(today)</span>
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">                &amp;&amp; !current.getEndDate().isBefore(today)) {</span>
+<span class="fc" id="L43">            throw new IllegalArgumentException(&quot;Employee already has an active contract&quot;);</span>
+        }
+
+<span class="fc" id="L46">        contract.setEmployee(employee);</span>
+<span class="fc" id="L47">        employee.setContract(contract);</span>
+<span class="fc" id="L48">        Contract created = contractRepository.save(contract);</span>
+<span class="fc" id="L49">        employeeService.update(employee.getMatricule(), employee);</span>
+<span class="fc" id="L50">        return contractMapper.toResponseDTO(created);</span>
+    }
+
+    @Override
+    public ContractResponseDTO update(Long id, Contract contract){
+<span class="fc" id="L55">        Optional&lt;Contract&gt; contrac = contractRepository.findById(id);</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">        if(contrac.isPresent()){</span>
+<span class="fc" id="L57">            Contract created = contractRepository.save(contract);</span>
+<span class="fc" id="L58">            return contractMapper.toResponseDTO(created);</span>
+        }else{
+<span class="fc" id="L60">            return null;</span>
+        }
+    }
+
+    @Override
+    public Contract viewContract(Long id){
+<span class="fc" id="L66">        Contract found = contractRepository.findById(id).orElse(null);</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        if(found != null){</span>
+<span class="fc" id="L68">            return found;</span>
+        }else{
+<span class="fc" id="L70">            return null;</span>
+        }
+    }
+
+    @Override
+    public List&lt;ContractResponseDTO&gt; viewAll(){
+
+<span class="fc" id="L77">        return contractRepository.findAll()</span>
+<span class="fc" id="L78">                .stream()</span>
+<span class="fc" id="L79">                .map(contractMapper::toResponseDTO)</span>
+<span class="fc" id="L80">                .toList();</span>
+    }
+
+    @Override
+    public boolean endContract(Long contractId){
+
+<span class="fc" id="L86">        Contract contract = contractRepository.findById(contractId).orElse(null);</span>
+<span class="fc bfc" id="L87" title="All 2 branches covered.">        if(contract != null){</span>
+<span class="fc" id="L88">            contractRepository.delete(contract);</span>
+<span class="fc" id="L89">            return true;</span>
+        }else {
+<span class="fc" id="L91">            return false;</span>
+        }
+    }
+
+    @Override
+    public List&lt;ContractResponseDTO&gt; getActiveContracts(Long employeeId){
+<span class="fc" id="L97">        LocalDate date = LocalDate.now();</span>
+<span class="fc" id="L98">        Employee employee = employeeService.viewEmployee(employeeId);</span>
+<span class="fc" id="L99">        Contract contract = employee.getContract();</span>
+<span class="pc bpc" id="L100" title="2 of 6 branches missed.">        if (contract == null || contract.getStartDate().isAfter(date) || contract.getEndDate().isBefore(date)) {</span>
+<span class="fc" id="L101">            return List.of();</span>
+        }
+<span class="fc" id="L103">        return List.of(contract).stream()</span>
+<span class="fc" id="L104">                .map(contractMapper::toResponseDTO)</span>
+<span class="fc" id="L105">                .toList();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

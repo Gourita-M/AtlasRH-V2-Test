@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Employee.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AtlasRH</a> &gt; <a href="index.source.html" class="el_package">org.example.atlasrh.model</a> &gt; <span class="el_source">Employee.java</span></div><h1>Employee.java</h1><pre class="source lang-java linenums">package org.example.atlasrh.model;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import org.example.atlasrh.Enum.RoleType;
+
+@Entity
+@Table( name = &quot;employee&quot; )
+public class Employee {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long matricule;
+
+    @NotBlank
+    @Column(name = &quot;\&quot;firstName\&quot;&quot; , nullable = false)
+    private String firstName;
+
+    @NotBlank
+    @Column(name = &quot;\&quot;lastName\&quot;&quot; , nullable = false)
+    private String lastName;
+
+    @Email
+    @NotBlank
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @NotBlank
+    @Column(name = &quot;\&quot;jobTitle\&quot;&quot; , nullable = false)
+    private String jobTitle;
+
+    @NotNull
+    @Column(name = &quot;\&quot;hireDate\&quot;&quot; , nullable = false)
+    private LocalDate hireDate;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column( nullable = false )
+    private RoleType role;
+
+    @ManyToOne
+    @JoinColumn( name = &quot;department_id&quot; )
+    Department department;
+
+    @ManyToOne
+    @JoinColumn(name = &quot;contract_id&quot;)
+    Contract contract;
+
+    @ManyToOne
+    @JoinColumn(name = &quot;manager_id&quot;)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private Employee manager;
+
+<span class="fc" id="L61">    @OneToMany</span>
+    List&lt;LeaveRequest&gt; leaveRequests = new ArrayList&lt;&gt;();
+
+<span class="fc" id="L64">    public Employee(){</span>
+
+<span class="fc" id="L66">    }</span>
+
+<span class="fc" id="L68">    public Employee(String firstName, String lastName, String email, String jobTitle, LocalDate hireDate, RoleType role) {</span>
+<span class="fc" id="L69">        this.firstName = firstName;</span>
+<span class="fc" id="L70">        this.lastName = lastName;</span>
+<span class="fc" id="L71">        this.email = email;</span>
+<span class="fc" id="L72">        this.jobTitle = jobTitle;</span>
+<span class="fc" id="L73">        this.hireDate = hireDate;</span>
+<span class="fc" id="L74">        this.role = role;</span>
+<span class="fc" id="L75">    }</span>
+
+    public long getMatricule() {
+<span class="fc" id="L78">        return matricule;</span>
+    }
+
+    public void setMatricule(long matricule) {
+<span class="fc" id="L82">        this.matricule = matricule;</span>
+<span class="fc" id="L83">    }</span>
+
+    public String getFirstName() {
+<span class="fc" id="L86">        return firstName;</span>
+    }
+
+    public void setFirstName(String firstName) {
+<span class="fc" id="L90">        this.firstName = firstName;</span>
+<span class="fc" id="L91">    }</span>
+
+    public String getLastName() {
+<span class="fc" id="L94">        return lastName;</span>
+    }
+
+    public void setLastName(String lastName) {
+<span class="fc" id="L98">        this.lastName = lastName;</span>
+<span class="fc" id="L99">    }</span>
+
+    public String getEmail() {
+<span class="fc" id="L102">        return email;</span>
+    }
+
+    public void setEmail(String email) {
+<span class="fc" id="L106">        this.email = email;</span>
+<span class="fc" id="L107">    }</span>
+
+    public String getJobTitle() {
+<span class="fc" id="L110">        return jobTitle;</span>
+    }
+
+    public void setJobTitle(String jobTitle) {
+<span class="fc" id="L114">        this.jobTitle = jobTitle;</span>
+<span class="fc" id="L115">    }</span>
+
+    public LocalDate getHireDate() {
+<span class="fc" id="L118">        return hireDate;</span>
+    }
+
+    public void setHireDate(LocalDate hireDate) {
+<span class="fc" id="L122">        this.hireDate = hireDate;</span>
+<span class="fc" id="L123">    }</span>
+
+    public RoleType getRole() {
+<span class="fc" id="L126">        return role;</span>
+    }
+
+    public void setRole(RoleType role) {
+<span class="fc" id="L130">        this.role = role;</span>
+<span class="fc" id="L131">    }</span>
+
+    public Department getDepartment() {
+<span class="fc" id="L134">        return department;</span>
+    }
+
+    public void setDepartment(Department department) {
+<span class="fc" id="L138">        this.department = department;</span>
+<span class="fc" id="L139">    }</span>
+
+    public Contract getContract() {
+<span class="fc" id="L142">        return contract;</span>
+    }
+
+    public void setContract(Contract contract) {
+<span class="fc" id="L146">        this.contract = contract;</span>
+<span class="fc" id="L147">    }</span>
+
+    public Employee getManager() {
+<span class="fc" id="L150">        return manager;</span>
+    }
+
+    public void setManager(Employee manager) {
+<span class="fc" id="L154">        this.manager = manager;</span>
+<span class="fc" id="L155">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

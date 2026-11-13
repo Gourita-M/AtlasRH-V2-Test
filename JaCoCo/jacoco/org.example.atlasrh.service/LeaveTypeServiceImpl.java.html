@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LeaveTypeServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AtlasRH</a> &gt; <a href="index.source.html" class="el_package">org.example.atlasrh.service</a> &gt; <span class="el_source">LeaveTypeServiceImpl.java</span></div><h1>LeaveTypeServiceImpl.java</h1><pre class="source lang-java linenums">package org.example.atlasrh.service;
+
+import org.example.atlasrh.dto.LeaveTypeResponseDTO;
+import org.example.atlasrh.mapper.LeaveTypeMapper;
+import org.example.atlasrh.model.LeaveType;
+import org.example.atlasrh.repository.LeaveTypeRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class LeaveTypeServiceImpl implements LeaveTypeService {
+    private final LeaveTypeRepository leaveTypeRepository;
+    private final LeaveTypeMapper leaveTypeMapper;
+
+<span class="fc" id="L16">    public LeaveTypeServiceImpl(LeaveTypeRepository leaveTypeRepository, LeaveTypeMapper leaveTypeMapper) {</span>
+<span class="fc" id="L17">        this.leaveTypeRepository = leaveTypeRepository;</span>
+<span class="fc" id="L18">        this.leaveTypeMapper = leaveTypeMapper;</span>
+<span class="fc" id="L19">    }</span>
+
+    @Override
+    public LeaveTypeResponseDTO create(LeaveType leaveType){
+<span class="fc" id="L23">        LeaveType created = leaveTypeRepository.save(leaveType);</span>
+<span class="fc" id="L24">        return leaveTypeMapper.toResponseDTO(created);</span>
+    }
+
+    @Override
+    public LeaveType viewLeaveType(Long id){
+<span class="fc" id="L29">        return leaveTypeRepository.findById(Math.toIntExact(id))</span>
+<span class="fc" id="L30">                .orElseThrow(() -&gt; new RuntimeException(&quot;LeaveType Can't be Found&quot;));</span>
+    }
+
+    @Override
+    public List&lt;LeaveTypeResponseDTO&gt; viewAll(){
+<span class="fc" id="L35">        return leaveTypeRepository.findAll().stream()</span>
+<span class="fc" id="L36">                .map(leaveTypeMapper::toResponseDTO)</span>
+<span class="fc" id="L37">                .toList();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

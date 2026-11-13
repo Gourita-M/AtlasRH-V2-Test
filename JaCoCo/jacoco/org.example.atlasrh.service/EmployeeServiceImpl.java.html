@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmployeeServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AtlasRH</a> &gt; <a href="index.source.html" class="el_package">org.example.atlasrh.service</a> &gt; <span class="el_source">EmployeeServiceImpl.java</span></div><h1>EmployeeServiceImpl.java</h1><pre class="source lang-java linenums">package org.example.atlasrh.service;
+
+import org.example.atlasrh.dto.EmployeeResponseDTO;
+import org.example.atlasrh.mapper.EmployeeMapper;
+import org.example.atlasrh.model.Contract;
+import org.example.atlasrh.model.Department;
+import org.example.atlasrh.model.Employee;
+import org.example.atlasrh.repository.ContractRepository;
+import org.example.atlasrh.repository.EmployeeRepository;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class EmployeeServiceImpl implements EmployeeService {
+
+    private final EmployeeRepository employeeRepository;
+    private final EmployeeMapper employeeMapper;
+    private final DepartmentService departmentService;
+    private final ContractRepository contractRepository;
+
+    public EmployeeServiceImpl(
+            EmployeeRepository employeeRepository,
+            EmployeeMapper employeeMapper, 
+            DepartmentService departmentService,
+<span class="fc" id="L27">            ContractRepository contractRepository) {</span>
+<span class="fc" id="L28">        this.employeeRepository = employeeRepository;</span>
+<span class="fc" id="L29">        this.employeeMapper = employeeMapper;</span>
+<span class="fc" id="L30">        this.departmentService = departmentService;</span>
+<span class="fc" id="L31">        this.contractRepository = contractRepository;</span>
+<span class="fc" id="L32">    }</span>
+
+    @Override
+    public Employee create(Employee employee, Long departmentId, Long contractId) {
+<span class="pc bpc" id="L36" title="1 of 2 branches missed.">        if (employee == null) {</span>
+<span class="nc" id="L37">            throw new IllegalArgumentException(&quot;Employee is required&quot;);</span>
+        }
+<span class="fc bfc" id="L39" title="All 4 branches covered.">        if (employee.getMatricule() != 0 &amp;&amp; employeeRepository.existsById(employee.getMatricule())) {</span>
+<span class="fc" id="L40">            throw new IllegalArgumentException(&quot;Employee number already exists&quot;);</span>
+        }
+<span class="fc bfc" id="L42" title="All 2 branches covered.">        if (employeeRepository.existsByEmail(employee.getEmail())) {</span>
+<span class="fc" id="L43">            throw new IllegalArgumentException(&quot;Employee email already exists&quot;);</span>
+        }
+
+<span class="fc" id="L46">        validateAndResolveManager(employee, null);</span>
+
+<span class="fc" id="L48">        Department department = departmentService.viewDepartment(departmentId);</span>
+<span class="fc" id="L49">        Contract contract = contractRepository.findById(contractId).orElse(null);</span>
+
+<span class="pc bpc" id="L51" title="2 of 4 branches missed.">        if (department == null || contract == null) {</span>
+<span class="nc" id="L52">            throw new IllegalArgumentException(&quot;Department or contract was not found&quot;);</span>
+        }
+<span class="fc" id="L54">        employee.setDepartment(department);</span>
+<span class="fc" id="L55">        employee.setContract(contract);</span>
+
+<span class="fc" id="L57">        return employeeRepository.save(employee);</span>
+
+    }
+
+     @Override
+     public EmployeeResponseDTO update(Long id, Employee employee) {
+<span class="fc" id="L63">         Employee existingEmployee = employeeRepository.findById(id)</span>
+<span class="fc" id="L64">                 .orElseThrow(() -&gt;</span>
+<span class="nc" id="L65">                         new RuntimeException(&quot;Employee not found: &quot; + id));</span>
+
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">         if (employeeRepository.existsByEmailAndMatriculeNot(employee.getEmail(), id)) {</span>
+<span class="nc" id="L68">             throw new IllegalArgumentException(&quot;Employee email already exists&quot;);</span>
+         }
+<span class="fc" id="L70">         validateAndResolveManager(employee, id);</span>
+<span class="fc" id="L71">         existingEmployee.setFirstName(employee.getFirstName());</span>
+<span class="fc" id="L72">         existingEmployee.setLastName(employee.getLastName());</span>
+<span class="fc" id="L73">         existingEmployee.setEmail(employee.getEmail());</span>
+<span class="fc" id="L74">         existingEmployee.setJobTitle(employee.getJobTitle());</span>
+<span class="fc" id="L75">         existingEmployee.setHireDate(employee.getHireDate());</span>
+<span class="fc" id="L76">         existingEmployee.setRole(employee.getRole());</span>
+<span class="fc" id="L77">         existingEmployee.setManager(employee.getManager());</span>
+
+<span class="fc" id="L79">         Employee updatedEmployee = employeeRepository.save(existingEmployee);</span>
+
+<span class="fc" id="L81">         return employeeMapper.toResponseDTO(updatedEmployee);</span>
+     }
+
+     @Override
+     public Employee viewEmployee(Long id) {
+<span class="fc" id="L86">         return employeeRepository.findById(id)</span>
+<span class="fc" id="L87">                 .orElseThrow(() -&gt;</span>
+<span class="fc" id="L88">                         new RuntimeException(&quot;Employee not found: &quot; + id));</span>
+
+     }
+
+    @Override
+    public List&lt;EmployeeResponseDTO&gt; viewAll() {
+<span class="fc" id="L94">        return employeeRepository.findAll()</span>
+<span class="fc" id="L95">                .stream()</span>
+<span class="fc" id="L96">                .map(employeeMapper::toResponseDTO)</span>
+<span class="fc" id="L97">                .toList();</span>
+    }
+
+     @Override
+     public List&lt;EmployeeResponseDTO&gt; viewAllByManager(Long managerId){
+<span class="fc" id="L102">        return employeeRepository.findAllByManager_Matricule(managerId).stream()</span>
+<span class="fc" id="L103">                .map(employeeMapper::toResponseDTO)</span>
+<span class="fc" id="L104">                .toList();</span>
+     }
+
+     @Override
+     public List&lt;EmployeeResponseDTO&gt; searchForEmployee(String name, Long departmentId, Pageable pageable){
+<span class="pc bpc" id="L109" title="1 of 2 branches missed.">        return employeeRepository.searchEmployees(name == null ? &quot;&quot; : name.trim(),</span>
+                        departmentId, pageable)
+<span class="fc" id="L111">                .map(employeeMapper::toResponseDTO)</span>
+<span class="fc" id="L112">                .toList();</span>
+     }
+
+     @Override
+     public List&lt;EmployeeResponseDTO&gt; getEmplyeeByMart(Long matr){
+<span class="fc" id="L117">        return employeeRepository.findById(matr)</span>
+<span class="fc" id="L118">                .map(employeeMapper::toResponseDTO)</span>
+<span class="fc" id="L119">                .stream()</span>
+<span class="fc" id="L120">                .toList();</span>
+     }
+
+     private void validateAndResolveManager(Employee employee, Long employeeId) {
+<span class="fc" id="L124">         Employee manager = employee.getManager();</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">         if (manager == null) {</span>
+<span class="fc" id="L126">             return;</span>
+         }
+<span class="fc bfc" id="L128" title="All 4 branches covered.">         if (manager == employee</span>
+<span class="pc bpc" id="L129" title="2 of 4 branches missed.">                 || (employeeId != null &amp;&amp; manager.getMatricule() == employeeId)</span>
+<span class="pc bpc" id="L130" title="1 of 2 branches missed.">                 || (employeeId == null &amp;&amp; employee.getMatricule() != 0</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">                     &amp;&amp; manager.getMatricule() == employee.getMatricule())) {</span>
+<span class="fc" id="L132">             throw new IllegalArgumentException(&quot;An employee cannot be their own manager&quot;);</span>
+         }
+<span class="pc bpc" id="L134" title="1 of 2 branches missed.">         if (manager.getMatricule() == 0) {</span>
+<span class="nc" id="L135">             throw new IllegalArgumentException(&quot;A manager must have an employee number&quot;);</span>
+         }
+<span class="fc" id="L137">         employee.setManager(employeeRepository.findById(manager.getMatricule())</span>
+<span class="pc" id="L138">                 .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Manager was not found&quot;)));</span>
+<span class="fc" id="L139">     }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

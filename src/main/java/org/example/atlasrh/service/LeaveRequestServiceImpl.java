@@ -39,20 +39,25 @@ public class LeaveRequestServiceImpl implements LeaveRequestService{
 
     @Override
     public LeaveRequestResponseDTO create(LeaveRequest leaveRequest, Long employeeId, Long leaveTypeId){
-        if(leaveRequest.getStartDate().isAfter(leaveRequest.getEndDate())){
+        if (leaveRequest == null || leaveRequest.getStartDate() == null
+                || leaveRequest.getEndDate() == null
+                || leaveRequest.getStartDate().isAfter(leaveRequest.getEndDate())) {
             throw new IllegalArgumentException("Start Date is After End Date");
         }
 
-        LeaveType leavetype = leaveTypeRepository.findById(leaveTypeId).orElse(null);
-        Employee employee = employeeRepository.findById(employeeId).orElse(null);
-        if(leavetype == null || employee == null){
-            leaveRequest.setEmployee(employee);
-            leaveRequest.setLeavetype(leavetype);
-            leaveRequestRepository.save(leaveRequest);
-            return leaveRequestMapper.toResponseDTO(leaveRequest);
-        }else {
+        LeaveType leavetype = leaveTypeId == null ? null
+                : leaveTypeRepository.findById(Math.toIntExact(leaveTypeId)).orElse(null);
+        Employee employee = employeeId == null ? null : employeeRepository.findById(employeeId).orElse(null);
+        if (leavetype == null || employee == null) {
             throw new IllegalArgumentException("Leave Type or Employee is Null");
         }
+        leaveRequest.setEmployee(employee);
+        leaveRequest.setLeavetype(leavetype);
+        if (leaveRequest.getStatus() == null) {
+            leaveRequest.setStatus(LeaveStatus.PENDING);
+        }
+        LeaveRequest saved = leaveRequestRepository.save(leaveRequest);
+        return leaveRequestMapper.toResponseDTO(saved);
     }
 
     @Override
@@ -83,14 +88,14 @@ public class LeaveRequestServiceImpl implements LeaveRequestService{
 
     @Override
     public List<LeaveRequestResponseDTO> getRequests(Long employeeId, Pageable pageable) {
-        return null;
+        return leaveRequestRepository.findAllByEmployee_Matricule(employeeId, pageable)
+                .map(leaveRequestMapper::toResponseDTO)
+                .toList();
     }
 
     @Override
     public List<LeaveRequestResponseDTO> getMyRequestsByStatus(Long employeeId, LeaveStatus status, Pageable pageable){
-        return leaveRequestRepository.findAll().stream()
-                .filter(l -> l.getId().equals(employeeId))
-                .filter(l -> l.getStatus() == status)
+        return leaveRequestRepository.findAllByEmployee_MatriculeAndStatus(employeeId, status, pageable)
                 .map(leaveRequestMapper::toResponseDTO)
                 .toList();
     }
@@ -164,7 +169,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService{
     @Override
     public boolean cancelRequest(Long employeeId, Long requestId) {
         LeaveRequest leaveRequest = leaveRequestRepository.findByIdAndEmployee_Matricule(requestId, employeeId);
-        if(leaveRequest != null){
+        if (leaveRequest != null && leaveRequest.getStatus() == LeaveStatus.PENDING) {
             leaveRequest.setStatus(LeaveStatus.CANCELLED);
             leaveRequestRepository.save(leaveRequest);
             return true;

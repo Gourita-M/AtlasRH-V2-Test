@@ -5,6 +5,7 @@ import org.example.atlasrh.mapper.DepartmentMapper;
 import org.example.atlasrh.model.Department;
 import org.example.atlasrh.model.Employee;
 import org.example.atlasrh.repository.DepartmentRepository;
+import org.example.atlasrh.repository.EmployeeRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,10 +14,13 @@ import java.util.List;
 public class DepartmentServiceImpl implements DepartmentService {
     private final DepartmentRepository departmentRepository;
     private final DepartmentMapper departmentMapper;
+    private final EmployeeRepository employeeRepository;
 
-    public DepartmentServiceImpl(DepartmentRepository departmentRepository,  DepartmentMapper departmentMapper) {
+    public DepartmentServiceImpl(DepartmentRepository departmentRepository, DepartmentMapper departmentMapper,
+                                 EmployeeRepository employeeRepository) {
         this.departmentRepository = departmentRepository;
         this.departmentMapper = departmentMapper;
+        this.employeeRepository = employeeRepository;
     }
 
     @Override
@@ -45,15 +49,21 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public List<DepartmentResponseDTO> viewAllByManager(Long managerId){
-    //        List<DepartmentResponseDTO> departments = departmentRepository.findAll().stream()
-    //                .filter(d -> d.getEmployees())
-        return null;
+        return employeeRepository.findAllByManager_Matricule(managerId).stream()
+                .map(Employee::getDepartment)
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .map(departmentMapper::toResponseDTO)
+                .toList();
     }
 
     @Override
     public boolean deleteDepartment(Long id){
 
         Department department = departmentRepository.findById(id).orElseThrow( () -> new RuntimeException("There is no Department with this ID"));
+        if (employeeRepository.existsByDepartment_Id(id)) {
+            throw new IllegalStateException("Cannot delete a department that has employees");
+        }
         departmentRepository.delete(department);
         return true;
     }

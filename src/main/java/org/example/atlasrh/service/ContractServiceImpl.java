@@ -6,6 +6,7 @@ import org.example.atlasrh.model.Contract;
 import org.example.atlasrh.model.Employee;
 import org.example.atlasrh.repository.ContractRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,17 +27,27 @@ public class ContractServiceImpl implements ContractService{
     }
 
     @Override
+    @Transactional
     public ContractResponseDTO create(Contract contract, Long id){
         Employee employee = employeeService.viewEmployee(id);
 
-        if(employee != null){
-            contract.setEmployee(employee);
-            Contract created = contractRepository.save(contract);
-            return contractMapper.toResponseDTO(created);
-        }else{
-            return null;
+        if (contract.getStartDate() == null || contract.getEndDate() == null
+                || contract.getStartDate().isAfter(contract.getEndDate())) {
+            throw new IllegalArgumentException("Contract dates are invalid");
+        }
+        LocalDate today = LocalDate.now();
+        Contract current = employee.getContract();
+        if (current != null
+                && !current.getStartDate().isAfter(today)
+                && !current.getEndDate().isBefore(today)) {
+            throw new IllegalArgumentException("Employee already has an active contract");
         }
 
+        contract.setEmployee(employee);
+        employee.setContract(contract);
+        Contract created = contractRepository.save(contract);
+        employeeService.update(employee.getMatricule(), employee);
+        return contractMapper.toResponseDTO(created);
     }
 
     @Override
@@ -84,8 +95,12 @@ public class ContractServiceImpl implements ContractService{
     @Override
     public List<ContractResponseDTO> getActiveContracts(Long employeeId){
         LocalDate date = LocalDate.now();
-        return contractRepository.findAll().stream()
-                .filter(c -> c.getEndDate().isBefore(date))
+        Employee employee = employeeService.viewEmployee(employeeId);
+        Contract contract = employee.getContract();
+        if (contract == null || contract.getStartDate().isAfter(date) || contract.getEndDate().isBefore(date)) {
+            return List.of();
+        }
+        return List.of(contract).stream()
                 .map(contractMapper::toResponseDTO)
                 .toList();
     }

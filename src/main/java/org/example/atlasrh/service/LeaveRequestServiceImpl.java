@@ -62,10 +62,19 @@ public class LeaveRequestServiceImpl implements LeaveRequestService{
 
     @Override
     public LeaveRequestResponseDTO update(Long id, LeaveRequest leaveRequest){
+        if (leaveRequest == null || leaveRequest.getStartDate() == null
+                || leaveRequest.getEndDate() == null
+                || leaveRequest.getStartDate().isAfter(leaveRequest.getEndDate())) {
+            throw new IllegalArgumentException("Leave request dates are invalid");
+        }
         Optional<LeaveRequest> leaveReq = leaveRequestRepository.findById(id);
         if(leaveReq.isPresent()){
-            leaveRequestRepository.save(leaveRequest);
-            return leaveRequestMapper.toResponseDTO(leaveRequest);
+            LeaveRequest existing = leaveReq.get();
+            existing.setStartDate(leaveRequest.getStartDate());
+            existing.setEndDate(leaveRequest.getEndDate());
+            existing.setReason(leaveRequest.getReason());
+            LeaveRequest saved = leaveRequestRepository.save(existing);
+            return leaveRequestMapper.toResponseDTO(saved);
         }else{
             return null;
         }
@@ -159,7 +168,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService{
         long workingDays = 0;
         for (LocalDate day = start; !day.isAfter(end); day = day.plusDays(1)) {
             DayOfWeek dayOfWeek = day.getDayOfWeek();
-            if (dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY) {
+            if (!dayOfWeek.equals(DayOfWeek.SATURDAY) && !dayOfWeek.equals(DayOfWeek.SUNDAY)) {
                 workingDays++;
             }
         }

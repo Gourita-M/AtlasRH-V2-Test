@@ -58,7 +58,16 @@ The tests exercise employee number/email uniqueness, self-manager rejection, act
 
 Fixes made alongside the tests include enforcing employee uniqueness and manager rules, selecting active contracts correctly, validating leave request references, implementing employee/leave-request search paths, preventing cancellation of decided requests, and correcting DTO mapping by binding Lombok and MapStruct annotation processing.
 
-Refresh actual coverage results using `./mvnw clean verify`. SonarQube results depend on the configured server profile and Quality Gate and should be added after the analysis has run.
+| Measure | Before | After |
+|---|---:|---:|
+| Automated tests | 10, with 1 failing | 56 passing, 0 skipped |
+| JaCoCo line coverage | Not configured | 93.2% (80% minimum enforced) |
+| JaCoCo instruction coverage | Not configured | 89.5% |
+| SonarQube findings / Quality Gate | Not analyzed | Pending: no local server was reachable at `localhost:9000` |
+
+Refresh coverage results using `./mvnw clean verify`. SonarQube results depend on the configured server profile and Quality Gate and should be recorded after the analysis has run.
+
+Before applying the model changes to an existing database, check for duplicate employee emails and plan the migration of enum columns and the employee-contract/manager relationships. Tests create a fresh H2 schema and do not migrate or modify any application database.
 
 ## Leave balance and length-of-service API
 

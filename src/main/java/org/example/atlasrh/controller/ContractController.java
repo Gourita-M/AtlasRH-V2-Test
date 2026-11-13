@@ -3,7 +3,8 @@ package org.example.atlasrh.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.example.atlasrh.model.Contract;
+import jakarta.validation.Valid;
+import org.example.atlasrh.dto.ContractRequestDTO;
 import org.example.atlasrh.service.ContractService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,10 +34,11 @@ public class ContractController {
     //PostMan done
     @PostMapping("/{id}")
     @Operation(summary = "Create Contract")
-    public ResponseEntity<?> save(@RequestBody Contract contract, @PathVariable("id") Long id){
+    public ResponseEntity<?> save(@Valid @RequestBody ContractRequestDTO request,
+                                  @PathVariable("id") Long id){
         try{
                 return ResponseEntity.status(HttpStatus.CREATED)
-                        .body(contractService.create(contract, id));
+                        .body(contractService.create(request.toContract(), id));
         }catch(Exception e){
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }
